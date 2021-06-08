@@ -9,7 +9,12 @@ from kivy.uix.label import Label
 from tensorflow.keras.models import load_model
 import numpy as np
 from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.preprocessing.image import save_img
+
+
 import os
+import matplotlib.pyplot as plt
 
 # RGBA = Red,Green,Blue, Opacity
 Window.clearcolor = (0, 0, 0, 1)
@@ -21,7 +26,7 @@ class PaintWindow(Widget):
         colorG = random.randint(0, 255)
         colorB = random.randint(0, 255)
         self.canvas.add(Color(rgb=(1, 1, 1)))
-        d = 20
+        d = 10
         touch.ud['line'] = Line(points=(touch.x, touch.y), width = d)
         self.canvas.add(touch.ud['line'])
 
@@ -54,12 +59,20 @@ class PaintApp(App):
         self.lbl.text = "The digit recognized will appear here..."
         if os.path.exists("digit.png"):
             os.remove("digit.png")
+        if os.path.exists("digit0001.png"):
+            os.remove("digit0001.png")
 
 
     def predict_digit(self, obj):
-        self.painter.export_to_png("digit.png")
-        arr = np.array(load_img("digit.png", target_size=(28, 28), grayscale=True))
-        test = 255-arr
+        Window.screenshot("digit.png")
+        img = load_img("digit0001.png")
+        img_array = img_to_array(img)[:-100]
+        save_img('digit.png', img_array)
+        if os.path.exists("digit0001.png"):
+            os.remove("digit0001.png")
+        print("modified image")
+        arr = np.array(load_img("digit.png", target_size=(28,28) ,grayscale=True))
+        test = arr
         self.lbl.text = str(model.predict(np.array([test])).argmax(axis=1)[0])
 
 
